@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4f6f8" />
+    <title>FastAid Admin</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="../theme.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Admin navigation">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true" style="background: transparent; padding: 0; display: flex; align-items: center; justify-content: center;">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="stroke: none; width: 32px; height: 32px;">
+              <circle cx="12" cy="12" r="12" fill="#ff0000" />
+              <path d="M10 5h4v5h5v4h-5v5h-4v-5H5v-4h5V5z" fill="#ffffff" />
+            </svg>
+          </div>
+          <div>
+            <strong>FastAid</strong>
+            <small>Admin Console</small>
+          </div>
+        </div>
+
+        <nav class="nav-tabs" aria-label="Dashboard sections">
+          <button class="nav-tab active" type="button" data-view="certifications">Certifications</button>
+          <button class="nav-tab" type="button" data-view="monitoring">Monitoring</button>
+          <button class="nav-tab admin-only" type="button" data-view="logs">System Logs</button>
+          <button class="nav-tab admin-only" type="button" data-view="replay">Incident Replay</button>
+          <button class="nav-tab admin-only" type="button" data-view="users">Sensitive Users</button>
+        </nav>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Account Management</p>
+            <h1 id="viewTitle">Volunteer certifications</h1>
+          </div>
+
+          <div class="session-panel" aria-label="Current session">
+            <span id="sessionRole">Admin</span>
+            <select id="roleSelect" aria-label="Preview dashboard as role">
+              <option value="Admin">Admin</option>
+              <option value="Volunteer">Volunteer</option>
+              <option value="Victim">Victim</option>
+            </select>
+          </div>
+        </header>
+
+        <section class="metrics-strip" aria-label="System summary">
+          <article>
+            <span>Pending reviews</span>
+            <strong id="pendingCount">0</strong>
+          </article>
+          <article>
+            <span>Server uptime</span>
+            <strong id="uptimeValue">--</strong>
+          </article>
+          <article>
+            <span>CPU load</span>
+            <strong id="cpuValue">--</strong>
+          </article>
+          <article>
+            <span>Open alerts</span>
+            <strong id="alertCount">0</strong>
+          </article>
+        </section>
+
+        <section class="view active" id="certificationsView" aria-label="Certification review queue">
+          <div class="toolbar">
+            <div>
+              <h2>Certification queue</h2>
+              <p>Review uploads before volunteers can accept emergency cases.</p>
+            </div>
+            <input id="certSearch" type="search" placeholder="Search volunteer" aria-label="Search volunteer" />
+          </div>
+
+          <div class="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>Volunteer</th>
+                  <th>Phone</th>
+                  <th>Certification</th>
+                  <th>Score</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="certificationRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="view" id="monitoringView" aria-label="Server monitoring">
+          <div class="toolbar">
+            <div>
+              <h2>Uptime and performance</h2>
+              <p>Watch response health, system load, and active incident alerts.</p>
+            </div>
+            <button class="secondary-button" id="refreshMetricsButton" type="button">Refresh</button>
+          </div>
+
+          <div class="monitor-grid">
+            <section class="panel-block">
+              <h3>Live services</h3>
+              <div class="service-list" id="serviceList"></div>
+            </section>
+
+            <section class="panel-block">
+              <h3>Performance alerts</h3>
+              <div class="alert-list" id="alertList"></div>
+            </section>
+
+            <section class="panel-block">
+              <h3>Live responder GPS</h3>
+              <div class="service-list" id="liveResponderList"></div>
+            </section>
+
+            <section class="panel-block">
+              <h3>Live emergency requests</h3>
+              <div class="alert-list" id="liveEmergencyList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view admin-only" id="logsView" aria-label="System logs">
+          <div class="toolbar">
+            <div>
+              <h2>System logs</h2>
+              <p>Admin-only operational events and security alerts.</p>
+            </div>
+          </div>
+          <pre class="log-stream" id="logStream"></pre>
+        </section>
+
+        <section class="view admin-only" id="replayView" aria-label="Incident Replay">
+          <div class="toolbar">
+            <div>
+              <h2>Incident Replay</h2>
+              <p>Review GPS paths and timelines of past emergencies.</p>
+            </div>
+            <button class="secondary-button" id="refreshReplayBtn" type="button">Load History</button>
+          </div>
+          
+          <div style="display: flex; gap: 20px; height: 600px; margin-top: 20px;">
+            <div style="flex: 1; background: var(--surface-dark); border: 1px solid var(--border-color); border-radius: 8px; overflow-y: auto;">
+              <h3 style="padding: 15px; margin: 0; border-bottom: 1px solid var(--border-color); color: var(--text-color);">Past Incidents</h3>
+              <ul id="incidentList" style="list-style: none; padding: 0; margin: 0;">
+                <li style="padding: 15px; color: var(--text-muted); text-align: center;">Click Load History to fetch incidents</li>
+              </ul>
+            </div>
+            
+            <div style="flex: 2; display: flex; flex-direction: column; gap: 20px;">
+              <div id="replayMap" style="flex: 2; background: #e5e7eb; border-radius: 8px; border: 1px solid var(--border-color); overflow: hidden;">
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+                  Select an incident to view map
+                </div>
+              </div>
+              <div id="replayTimeline" style="flex: 1; background: var(--surface-dark); border-radius: 8px; border: 1px solid var(--border-color); padding: 15px; overflow-y: auto;">
+                <h3 style="margin-top: 0; color: var(--text-color);">Incident Timeline</h3>
+                <div id="timelineEvents" style="color: var(--text-muted); font-family: monospace;">Select an incident...</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view admin-only" id="usersView" aria-label="Sensitive user records">
+          <div class="toolbar">
+            <div>
+              <h2>Sensitive user records</h2>
+              <p>Admin-only account identifiers and verification state.</p>
+            </div>
+          </div>
+          <div class="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Verification</th>
+                </tr>
+              </thead>
+              <tbody id="userRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="access-denied" id="accessDenied" hidden>
+          <strong>Access restricted</strong>
+          <span>Admin role required for this section.</span>
+        </section>
+      </main>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <script src="../auth.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

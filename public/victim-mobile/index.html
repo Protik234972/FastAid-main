@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f7f3ed" />
+    <title>FastAid Emergency</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIINfQABp6HkRk6mXn8NCnEUDgZXyIsF5Fg="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="../theme.css" />
+    <style>
+      /* Hide the routing itinerary completely, we only want the map line */
+      .leaflet-routing-container {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Inherit Mesh Background -->
+    <div class="mesh-bg"></div>
+
+    <div class="dashboard-container">
+      <header class="dashboard-header">
+        <div>
+          <h1 class="dashboard-title">Victim Portal</h1>
+          <p class="dashboard-subtitle">Emergency Help Request</p>
+        </div>
+        <button class="icon-button touch-target" id="locateButton" type="button" aria-label="Refresh GPS location" style="background: var(--surface-dark); border-radius: 50%; padding: 15px; color: white; border: 1px solid var(--border-color);">
+          <span aria-hidden="true" style="font-weight: bold;">GPS</span>
+        </button>
+      </header>
+
+      <main class="dashboard-layout" aria-live="polite">
+        <!-- Sidebar: Form and Actions -->
+        <aside class="dashboard-sidebar">
+          <section class="emergency-panel glass-panel" aria-label="Request emergency assistance">
+        <div class="responsive-inputs">
+          <div>
+            <label class="field-label compact" for="victimNameInput" style="color: var(--text-muted);">Victim name</label>
+            <input id="victimNameInput" class="form-input" type="text" placeholder="Your Name" autocomplete="name" />
+          </div>
+          <div>
+            <label class="field-label compact" for="noteInput" style="color: var(--text-muted);">Emergency Details</label>
+            <div style="display: flex; gap: 10px;">
+              <input id="noteInput" class="form-input touch-target" type="text" placeholder="e.g. Unconscious, bleeding" style="flex: 1;" />
+              <button id="micButton" type="button" class="btn-primary touch-target" aria-label="Voice input" style="width: 48px; height: 48px; padding: 0; background: var(--surface-dark); border: 1px solid var(--border-color); color: var(--primary-color);">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="22"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div style="display: none;">
+            <label class="field-label compact" for="victimIdInput" style="color: var(--text-muted);">Account ID</label>
+            <input
+              id="victimIdInput"
+              class="form-input"
+              type="text"
+              autocomplete="off"
+              readonly
+            />
+          </div>
+        </div>
+
+        <div class="responsive-tags" aria-label="Emergency type">
+          <button class="chip active btn-primary touch-target" type="button" data-type="Medical" style="flex: 1 1 calc(33% - 10px);">Medical</button>
+          <button class="chip touch-target" type="button" data-type="Accident" style="flex: 1 1 calc(33% - 10px); background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: white; border-radius: 8px;">Accident</button>
+          <button class="chip touch-target" type="button" data-type="Unsafe" style="flex: 1 1 calc(33% - 10px); background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: white; border-radius: 8px;">Unsafe</button>
+        </div>
+
+        <label class="field-label" for="noteInput" style="color: var(--text-muted);">Optional note</label>
+        <textarea
+          id="noteInput"
+          class="form-input"
+          rows="2"
+          maxlength="120"
+          placeholder="Example: chest pain, bleeding, trapped..."
+        ></textarea>
+
+        <button class="emergency-button btn-danger touch-target" id="emergencyButton" type="button" style="width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; border-radius: 12px; margin-top: 10px; min-height: 80px;">
+          <span style="font-size: 1.5rem; font-weight: bold;">Hold for emergency</span>
+          <small style="opacity: 0.8; margin-top: 5px;">GPS and request sent together</small>
+        </button>
+
+        <nav class="responsive-actions" aria-label="Emergency support actions">
+          <a href="tel:999" class="btn-primary touch-target" style="text-decoration: none; text-align: center;">Call 999</a>
+          <button id="shareButton" type="button" class="btn-primary touch-target" style="background: var(--surface-dark);">Share</button>
+          <button id="cancelButton" type="button" class="btn-primary touch-target" style="background: var(--surface-dark);">Cancel</button>
+        </nav>
+      </aside>
+
+      <!-- Main: Status and Map -->
+      <section class="dashboard-main">
+        <section class="status-panel glass-panel" aria-label="Current help status">
+          <p class="status-label" id="gpsStatus" style="color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase;">Location Status</p>
+          <p class="status-value" id="addressText" style="color: white; font-size: 1.25rem; font-weight: bold; margin-top: 5px;">Getting your location...</p>
+        </section>
+
+        <section id="aiDispatcherPanel" class="glass-panel" aria-label="AI Dispatcher Advice" style="display: none; border: 1px solid var(--primary-color); background: rgba(16, 185, 129, 0.1); margin-bottom: 16px;">
+          <h2 style="font-size: 1.2rem; margin-top: 0; color: var(--primary-color); display: flex; align-items: center; gap: 8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+            AI First-Aid Guidance
+          </h2>
+          <ul id="aiVictimAdviceList" style="padding-left: 20px; color: white; margin-bottom: 0; font-size: 1.1rem; line-height: 1.4;">
+            <li>Analyzing your emergency...</li>
+          </ul>
+        </section>
+
+        <section class="progress-panel glass-panel" aria-label="Emergency progress" id="progressPanel" hidden style="display: none;">
+        <div class="progress-heading">
+          <div>
+            <p class="eyebrow">Responder</p>
+            <h2 id="responderName">Waiting for acceptance</h2>
+          </div>
+          <strong id="etaText">-- min</strong>
+        </div>
+
+        <ol class="steps" aria-label="Emergency status">
+          <li class="step active" data-step="Pending">Requested</li>
+          <li class="step" data-step="Assigned">Assigned</li>
+          <li class="step" data-step="On the Way">On the way</li>
+          <li class="step" data-step="Help Arrived">Arrived</li>
+        </ol>
+
+        <div class="map-fluid glass-panel" style="padding: 0; position: relative;">
+          <div id="map" style="width: 100%; height: 100%; position: absolute; inset: 0;"></div>
+          
+          <button id="togglePoiBtn" class="btn-primary touch-target" style="position: absolute; top: 10px; right: 10px; z-index: 1000; padding: 8px 12px; font-size: 0.85rem; background: var(--surface-dark); border: 1px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+            Show Safe Zones
+          </button>
+
+          <div class="map-fallback glass-panel" id="mapFallback" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(18,36,29,0.9); z-index: 10;">
+            <strong style="color: var(--danger); font-size: 1.5rem;">No map available</strong>
+            <span style="color: var(--text-muted);">Please connect to the internet</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="medical-panel glass-panel" aria-label="Medical ID" style="margin-top: 16px;">
+        <h2 style="font-size: 1.2rem; margin-top: 0; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Medical ID (ICE)</h2>
+        <div class="responsive-inputs" style="margin-bottom: 10px;">
+          <div>
+            <label class="field-label compact" for="bloodTypeInput">Blood Type</label>
+            <select id="bloodTypeInput" class="form-input" style="height: 48px; background: rgba(0,0,0,0.2);">
+              <option value="">Unknown</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label compact" for="allergiesInput">Allergies</label>
+            <input id="allergiesInput" class="form-input" type="text" placeholder="e.g. Penicillin, Peanuts" />
+          </div>
+        </div>
+        <div style="margin-bottom: 10px;">
+          <label class="field-label compact" for="conditionsInput">Pre-existing Conditions</label>
+          <input id="conditionsInput" class="form-input" type="text" placeholder="e.g. Asthma, Diabetes" />
+        </div>
+        <div class="responsive-inputs" style="margin-bottom: 15px;">
+          <div>
+            <label class="field-label compact" for="emergencyContactNameInput">Emergency Contact</label>
+            <input id="emergencyContactNameInput" class="form-input" type="text" placeholder="Name" />
+          </div>
+          <div>
+            <label class="field-label compact" for="emergencyContactPhoneInput">Contact Phone</label>
+            <input id="emergencyContactPhoneInput" class="form-input" type="tel" placeholder="Phone Number" />
+          </div>
+        </div>
+        <button id="saveMedicalProfileBtn" class="btn-primary touch-target" style="width: 100%;">Save Medical ID</button>
+      </section>
+
+      <section id="chatPanel" class="chat-panel glass-panel" aria-label="Secure Chat" style="margin-top: 16px; display: none;">
+        <h2 style="font-size: 1.2rem; margin-top: 0; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; color: var(--primary-color);">Secure Chat (P2P)</h2>
+        <div id="chatMessages" style="height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px;">
+          <!-- Messages go here -->
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <input id="chatInput" class="form-input" type="text" placeholder="Type a message..." style="flex: 1; height: 48px;" />
+          <button id="sendChatBtn" class="btn-primary touch-target" style="min-width: 80px; height: 48px; background: var(--primary-color);">Send</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="../auth.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

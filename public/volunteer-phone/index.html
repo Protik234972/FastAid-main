@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#eef7f4" />
+    <title>FastAid Volunteer Tracker</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="../theme.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+  </head>
+  <body>
+    <!-- Inherit Mesh Background -->
+    <div class="mesh-bg"></div>
+
+    <div class="dashboard-container">
+      <header class="dashboard-header">
+        <div>
+          <h1 class="dashboard-title">Responder Tracker</h1>
+          <p class="dashboard-subtitle">Share live location while responding</p>
+        </div>
+      </header>
+
+      <main class="dashboard-layout">
+        <!-- Sidebar: Form and Actions -->
+        <aside class="dashboard-sidebar">
+          <section class="status-panel glass-panel" aria-label="Tracking status">
+        <span id="connectionState">Connecting...</span>
+        <strong id="trackingState">GPS not sharing</strong>
+      </section>
+
+          <section class="form-panel glass-panel" aria-label="Volunteer identity">
+            <div class="responsive-inputs" style="margin-bottom: 0;">
+              <div>
+                <label class="field-label compact" for="displayName" style="color: var(--text-muted);">Volunteer Name</label>
+            <input id="displayName" class="form-input touch-target" type="text" placeholder="Your Name" autocomplete="name" />
+          </div>
+              <div>
+                <label class="field-label compact" for="phone" style="color: var(--text-muted);">Phone</label>
+                <input id="phone" class="form-input touch-target" type="tel" value="01711002200" placeholder="017..." autocomplete="tel" />
+              </div>
+            </div>
+
+            <div class="responsive-inputs" style="margin-top: 15px;">
+              <div style="display: none;">
+            <label class="field-label compact" for="volunteerUserId" style="color: var(--text-muted);">Account ID</label>
+            <input
+              id="volunteerUserId"
+              class="form-input touch-target"
+              type="text"
+              autocomplete="off"
+              readonly
+            />
+          </div>
+              <div>
+                <label class="field-label compact" for="emergencyId" style="color: var(--text-muted);">Emergency ID (Optional)</label>
+                <input id="emergencyId" class="form-input touch-target" type="text" placeholder="Auto-filled from map" />
+              </div>
+            </div>
+          </section>
+
+          <section id="aiResponderPanel" class="glass-panel" aria-label="AI Briefing" style="display: none; margin-top: 15px; border: 1px solid var(--danger); background: rgba(239, 68, 68, 0.1);">
+            <h2 style="font-size: 1.1rem; margin-top: 0; color: var(--danger); display: flex; align-items: center; gap: 8px; margin-bottom: 10px; border-bottom: 1px solid rgba(239,68,68,0.2); padding-bottom: 8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+              AI Dispatcher Briefing
+            </h2>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+              <span style="color: var(--text-muted); font-size: 0.9rem;">Severity:</span>
+              <strong id="aiSeverity" style="color: white;">Analyzing...</strong>
+            </div>
+            <div style="margin-bottom: 10px;">
+              <span style="color: var(--text-muted); font-size: 0.9rem; display: block;">Keywords:</span>
+              <strong id="aiInjuries" style="color: white; font-size: 0.95rem;">...</strong>
+            </div>
+            <div>
+              <span style="color: var(--text-muted); font-size: 0.9rem; display: block; margin-bottom: 4px;">Action Plan:</span>
+              <ul id="aiResponderAdviceList" style="padding-left: 20px; color: white; margin-bottom: 0; font-size: 0.95rem; line-height: 1.4;">
+                <li>Waiting for AI analysis...</li>
+              </ul>
+            </div>
+          </section>
+
+
+          <section id="notificationPanel" class="glass-panel" aria-label="Push Notifications" style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border-color);">
+            <div style="display: flex; flex-direction: column;">
+              <strong style="color: white; font-size: 1rem;">Push Alerts</strong>
+              <span id="pushStatus" style="color: var(--text-muted); font-size: 0.85rem;">Not enabled</span>
+            </div>
+            <button id="enablePushBtn" class="btn-primary touch-target" style="padding: 8px 16px; min-height: 40px; background: var(--primary-color);">Enable</button>
+          </section>
+
+          <section id="chatPanel" class="chat-panel glass-panel" aria-label="Secure Chat" style="margin-top: 15px; display: none; border: 1px solid var(--primary-color);">
+            <h2 style="font-size: 1.2rem; margin-top: 0; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; color: var(--primary-color);">Secure Chat (P2P)</h2>
+            <div id="chatMessages" style="height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px;">
+              <!-- Messages go here -->
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <input id="chatInput" class="form-input" type="text" placeholder="Type a message..." style="flex: 1; height: 48px;" />
+              <button id="sendChatBtn" class="btn-primary touch-target" style="min-width: 80px; height: 48px; background: var(--primary-color);">Send</button>
+            </div>
+          </section>
+
+          <div style="display: flex; gap: 15px; margin-top: 15px;">
+            <button class="btn-primary touch-target" id="startButton" type="button" style="flex: 1; padding: 15px; min-height: 60px;">
+              Start GPS sharing
+            </button>
+
+            <button class="btn-primary touch-target" id="stopButton" type="button" disabled style="flex: 1; padding: 15px; background: var(--surface-dark); min-height: 60px;">
+              Stop sharing
+            </button>
+          </div>
+        </aside>
+
+        <!-- Main: Location Status and Map area -->
+        <section class="dashboard-main">
+          
+          <section id="victimMedicalPanel" class="medical-panel glass-panel" aria-label="Victim Medical ID" style="display: none; margin-bottom: 20px; border: 2px solid var(--danger);">
+            <h2 style="font-size: 1.2rem; margin-top: 0; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; color: var(--danger);">EMERGENCY MEDICAL ID</h2>
+            <div style="display: flex; gap: 20px; margin-bottom: 10px;">
+              <div>
+                <span style="display: block; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">Blood Type</span>
+                <strong id="displayBloodType" style="font-size: 1.5rem; color: white;">--</strong>
+              </div>
+              <div style="flex: 1;">
+                <span style="display: block; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">Allergies</span>
+                <strong id="displayAllergies" style="font-size: 1.1rem; color: white;">None listed</strong>
+              </div>
+            </div>
+            <div style="margin-bottom: 10px;">
+              <span style="display: block; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">Pre-existing Conditions</span>
+              <strong id="displayConditions" style="font-size: 1.1rem; color: white;">None listed</strong>
+            </div>
+            
+            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
+              <span style="display: block; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">Emergency Contact</span>
+              <strong id="displayEmergencyContact" style="font-size: 1.1rem; color: white;">--</strong>
+            </div>
+
+            <button id="droneBtn" class="btn-primary touch-target" style="width: 100%; margin-top: 15px; background: #6366f1; border: 1px solid #818cf8; color: white; display: flex; align-items: center; justify-content: center; gap: 10px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+                <circle cx="12" cy="12" r="4"></circle>
+              </svg>
+              Request Aerial MedDrone (AED)
+            </button>
+          </section>
+
+          <section class="location-panel glass-panel map-fluid" aria-label="Tracking Map" style="padding: 0; position: relative;">
+            <div id="map" style="width: 100%; height: 100%; position: absolute; inset: 0;"></div>
+            
+            <div id="mapFallback" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(18,36,29,0.9); z-index: 10;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin-bottom: 20px; color: var(--primary-color);">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span style="color: var(--text-muted); text-transform: uppercase; font-size: 0.9rem; margin-bottom: 10px;">Waiting for GPS</span>
+              <strong id="lastSent" style="font-size: 1.5rem; color: white;">Start sharing to view map</strong>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="../auth.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

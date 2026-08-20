@@ -1,0 +1,33 @@
+{
+  "name": "fast-responder-volunteer-network",
+  "version": "1.0.0",
+  "description": "Fast Responder Volunteer Network emergency response web application.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed": "node scripts/seedDemoData.js",
+    "check": "node --check src/server.js && node --check src/models/fastaid.models.js && node --check src/routes/admin.routes.js && node --check src/routes/emergency.routes.js && node --check src/routes/public.routes.js && node --check src/realtime/locationSocket.js && node --check src/middleware/rbac.js && node --check src/middleware/demoAuth.js && node --check src/middleware/database.js && node --check scripts/seedDemoData.js && node --check public/victim-mobile/app.js && node --check public/volunteer-phone/app.js && node --check public/admin-dashboard/app.js"
+  },
+  "keywords": [
+    "emergency",
+    "volunteer",
+    "response",
+    "mongodb",
+    "mongoose"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.6.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.5.0",
+    "mongoose": "^9.7.4",
+    "socket.io": "^4.8.3",
+    "web-push": "^3.6.7"
+  }
+}

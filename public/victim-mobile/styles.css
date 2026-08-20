@@ -1,0 +1,53 @@
+/* Legacy styles stripped out. UI relies on theme.css global dashboard styles */
+.map-wrap {
+  position: relative;
+  overflow: hidden;
+}
+#map {
+  position: absolute;
+  inset: 0;
+}
+.map-fallback.hidden {
+  display: none !important;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 16px 0;
+  padding: 0;
+  list-style: none;
+}
+.step {
+  min-height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-muted);
+  background: var(--surface-dark);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.15;
+  text-align: center;
+}
+.step.active {
+  border-color: var(--success);
+  color: #fff;
+  background: var(--success);
+}
+.progress-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.progress-heading strong {
+  min-width: 76px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #fff;
+  background: var(--bg-dark);
+  font-size: 18px;
+  text-align: center;
+}

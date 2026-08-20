@@ -1,0 +1,57 @@
+\contentsline {section}{\numberline {1}Executive Summary}{2}{section.1}%
+\contentsline {section}{\numberline {2}Introduction}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Purpose}{2}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Documents Conventions}{2}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Who should read this and how}{3}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Problem Definition}{3}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Scope of Work}{3}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}Overview}{4}{subsection.2.6}%
+\contentsline {subsection}{\numberline {2.7}Technical specifications}{4}{subsection.2.7}%
+\contentsline {subsection}{\numberline {2.8}System Architecture Diagram}{5}{subsection.2.8}%
+\contentsline {subsection}{\numberline {2.9}User Interface}{5}{subsection.2.9}%
+\contentsline {subsection}{\numberline {2.10}Hardware Interface}{6}{subsection.2.10}%
+\contentsline {subsection}{\numberline {2.11}Software Interface}{6}{subsection.2.11}%
+\contentsline {subsection}{\numberline {2.12}Survey (5 First Responders / Victims)}{6}{subsection.2.12}%
+\contentsline {subsection}{\numberline {2.13}Document Analysis (10 Academic Papers)}{6}{subsection.2.13}%
+\contentsline {section}{\numberline {3}Elicitation Results}{6}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Survey Results}{7}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Document Analysis Results}{7}{subsection.3.2}%
+\contentsline {section}{\numberline {4}Latest Features from Fieldwork}{7}{section.4}%
+\contentsline {section}{\numberline {5}Feature Comparison: Literature vs. Fieldwork}{8}{section.5}%
+\contentsline {section}{\numberline {6}Specific Requirements}{8}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Use Case Diagram}{8}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Sequence Diagram --- Emergency Dispatch Flow}{9}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Activity Diagram --- Emergency Dispatch Lifecycle}{10}{subsection.6.3}%
+\contentsline {subsection}{\numberline {6.4}Class Diagram --- Mongoose Data Models}{11}{subsection.6.4}%
+\contentsline {subsection}{\numberline {6.5}Component 1: Victim \& Volunteer Registration and Authentication}{12}{subsection.6.5}%
+\contentsline {subsection}{\numberline {6.6}Component 2: Emergency Request and AI Diagnosis}{13}{subsection.6.6}%
+\contentsline {subsection}{\numberline {6.7}Component 3: Live GPS Tracking and Dispatch}{14}{subsection.6.7}%
+\contentsline {subsection}{\numberline {6.8}Component 4: Payment Management}{15}{subsection.6.8}%
+\contentsline {subsection}{\numberline {6.9}Component 5: Admin Panel \& Verification}{16}{subsection.6.9}%
+\contentsline {subsection}{\numberline {6.10}Component 6: Notification and Status Management}{17}{subsection.6.10}%
+\contentsline {section}{\numberline {7}S.M.A.R.T. Justification of Selected Features}{18}{section.7}%
+\contentsline {subsection}{\numberline {7.1}AI Emergency Analysis (FR-06)}{19}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}WebSocket Live Tracking (FR-09)}{19}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}Auto-GPS Emergency Request (FR-05)}{19}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}Push Notifications with SMS Fallback (FR-16)}{19}{subsection.7.4}%
+\contentsline {subsection}{\numberline {7.5}Responder Geospatial Matching (FR-08)}{20}{subsection.7.5}%
+\contentsline {subsection}{\numberline {7.6}Volunteer Verification Workflow (FR-13)}{20}{subsection.7.6}%
+\contentsline {section}{\numberline {8}MoSCoW Requirement Prioritization}{20}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Should Have Features}{20}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Could Have Features}{21}{subsection.8.2}%
+\contentsline {section}{\numberline {9}Non-Functional Requirements}{21}{section.9}%
+\contentsline {section}{\numberline {10}Monitoring Strategy}{22}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Monitoring Tools}{22}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}Logging}{23}{subsection.10.2}%
+\contentsline {subsection}{\numberline {10.3}System Health Metrics}{23}{subsection.10.3}%
+\contentsline {section}{\numberline {11}Risk Management}{23}{section.11}%
+\contentsline {subsection}{\numberline {11.1}Risk Identification and Mitigation}{23}{subsection.11.1}%
+\contentsline {section}{\numberline {12}Change Management Process}{24}{section.12}%
+\contentsline {subsection}{\numberline {12.1}Change Request Workflow}{24}{subsection.12.1}%
+\contentsline {subsection}{\numberline {12.2}Change Evaluation}{24}{subsection.12.2}%
+\contentsline {subsection}{\numberline {12.3}Documentation and Versioning}{24}{subsection.12.3}%
+\contentsline {section}{\numberline {13}Appendices}{24}{section.13}%
+\contentsline {subsection}{\numberline {13.1}Glossary of Terms}{24}{subsection.13.1}%
+\contentsline {subsection}{\numberline {13.2}Acronyms and Abbreviations}{25}{subsection.13.2}%
+\contentsline {section}{\numberline {14}Conclusion}{25}{section.14}%
+\contentsline {section}{\numberline {15}References}{26}{section.15}%
