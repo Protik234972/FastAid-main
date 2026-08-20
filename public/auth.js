@@ -70,7 +70,7 @@ function showLoginModal(isLanding = false) {
         
         <!-- Login Form -->
         <form id="loginForm">
-          <input type="tel" id="loginPhone" class="form-input" placeholder="Phone Number (e.g. 01700000001)" required />
+          <input type="text" id="loginPhone" class="form-input" placeholder="Phone Number or Email" required />
           <input type="password" id="loginPassword" class="form-input" placeholder="Password" required />
           <button type="submit" class="btn-primary" style="width: 100%;">Sign In</button>
         </form>

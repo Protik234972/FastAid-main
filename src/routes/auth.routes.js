@@ -41,7 +41,7 @@ router.post('/login', async (req, res, next) => {
   try {
     const { phone, password } = req.body;
 
-    const user = await User.findOne({ phone }).select('+passwordHash');
+    const user = await User.findOne({ $or: [{ phone: phone }, { email: phone }] }).select('+passwordHash');
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
