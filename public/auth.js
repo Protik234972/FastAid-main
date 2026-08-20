@@ -88,12 +88,6 @@ function showLoginModal(isLanding = false) {
           </select>
           <button type="submit" class="btn-primary" style="width: 100%;">Create Account</button>
         </form>
-
-        <div id="demoHint" style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted); text-align: center;">
-          Demo accounts:<br/>
-          Victim: 01700000001 | Volunteer: 01700000002 | Admin: 01700000003<br/>
-          Password: password123
-        </div>
       </div>
     </div>
   `;
