@@ -75,11 +75,13 @@ const state = {
   pastEmergencies: [],
   replayMap: null,
   socket: null,
+  charts: {},
 };
 
 const viewTitles = {
   certifications: 'Volunteer certifications',
   monitoring: 'System monitoring',
+  analytics: 'System Analytics',
   logs: 'System logs',
   replay: 'Incident Replay',
   users: 'Sensitive user records',
@@ -96,7 +98,7 @@ function isAdmin() {
 }
 
 function canView(viewName) {
-  return !['logs', 'users', 'replay'].includes(viewName) || isAdmin();
+  return !['logs', 'users', 'replay', 'analytics'].includes(viewName) || isAdmin();
 }
 
 function setActiveView(viewName) {
@@ -119,6 +121,11 @@ function setActiveView(viewName) {
   if (viewName === 'replay') {
     if (!state.replayMap) initReplayMap();
     if (state.pastEmergencies.length === 0) fetchPastEmergencies();
+  }
+  
+  if (viewName === 'analytics') {
+    if (state.pastEmergencies.length === 0) fetchPastEmergencies().then(renderAnalytics);
+    else renderAnalytics();
   }
 }
 
@@ -281,6 +288,7 @@ function renderAll() {
   renderSensitiveUsers();
   renderLogs();
   renderReplayList();
+  renderAnalytics();
 }
 
 function renderReplayList() {
@@ -297,6 +305,103 @@ function renderReplayList() {
       <span style="font-size: 0.85rem; color: var(--text-muted);">${new Date(inc.createdAt).toLocaleString()}</span>
     </li>
   `).join('');
+}
+
+function renderAnalytics() {
+  if (!isAdmin() || state.activeView !== 'analytics') return;
+  
+  // Basic Stats
+  const volunteers = state.users.filter(u => u.role === 'Volunteer');
+  document.querySelector('#statTotalIncidents').textContent = state.pastEmergencies.length;
+  document.querySelector('#statTotalVolunteers').textContent = volunteers.length;
+  
+  let totalResponseTimeMs = 0;
+  let responseCount = 0;
+  state.pastEmergencies.forEach(inc => {
+    const assignedEvent = (inc.history || []).find(h => h.status === 'Assigned' || h.status === 'On the Way');
+    if (assignedEvent && inc.createdAt) {
+      totalResponseTimeMs += (new Date(assignedEvent.changedAt).getTime() - new Date(inc.createdAt).getTime());
+      responseCount++;
+    }
+  });
+  
+  if (responseCount > 0) {
+    const avgSec = Math.round(totalResponseTimeMs / responseCount / 1000);
+    document.querySelector('#statAvgResponse').textContent = avgSec < 60 ? \`\${avgSec}s\` : \`\${Math.round(avgSec/60)}m\`;
+  } else {
+    document.querySelector('#statAvgResponse').textContent = 'N/A';
+  }
+
+  // Chart Configuration
+  Chart.defaults.color = '#9ca3af';
+  Chart.defaults.borderColor = 'rgba(255,255,255,0.1)';
+
+  // 1. Incident Status Chart
+  const statusCounts = state.pastEmergencies.reduce((acc, cur) => {
+    acc[cur.status] = (acc[cur.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  if (state.charts.statusChart) state.charts.statusChart.destroy();
+  state.charts.statusChart = new Chart(document.getElementById('incidentStatusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(statusCounts),
+      datasets: [{
+        data: Object.values(statusCounts),
+        backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#6b7280'],
+        borderWidth: 0
+      }]
+    },
+    options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+  });
+
+  // 2. Timeline Chart (Last 7 Days)
+  const timelineData = {};
+  for(let i=6; i>=0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    timelineData[d.toLocaleDateString(undefined, {month: 'short', day: 'numeric'})] = 0;
+  }
+  
+  state.pastEmergencies.forEach(inc => {
+    const dString = new Date(inc.createdAt).toLocaleDateString(undefined, {month: 'short', day: 'numeric'});
+    if (timelineData[dString] !== undefined) timelineData[dString]++;
+  });
+
+  if (state.charts.timelineChart) state.charts.timelineChart.destroy();
+  state.charts.timelineChart = new Chart(document.getElementById('incidentTimelineChart'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(timelineData),
+      datasets: [{
+        label: 'Emergencies',
+        data: Object.values(timelineData),
+        backgroundColor: '#0ea5e9',
+        borderRadius: 4
+      }]
+    },
+    options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+  });
+
+  // 3. Volunteer Verification Chart
+  const verifCounts = volunteers.reduce((acc, cur) => {
+    acc[cur.verificationStatus] = (acc[cur.verificationStatus] || 0) + 1;
+    return acc;
+  }, {});
+
+  if (state.charts.verifChart) state.charts.verifChart.destroy();
+  state.charts.verifChart = new Chart(document.getElementById('volunteerStatusChart'), {
+    type: 'pie',
+    data: {
+      labels: Object.keys(verifCounts),
+      datasets: [{
+        data: Object.values(verifCounts),
+        backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#6b7280'],
+        borderWidth: 0
+      }]
+    },
+    options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+  });
 }
 
 function initReplayMap() {
@@ -376,6 +481,11 @@ document.querySelector('#incidentList').addEventListener('click', e => {
 });
 
 document.querySelector('#refreshReplayBtn').addEventListener('click', fetchPastEmergencies);
+if (document.querySelector('#refreshAnalyticsBtn')) {
+  document.querySelector('#refreshAnalyticsBtn').addEventListener('click', () => {
+    loadDashboardData().then(fetchPastEmergencies).then(renderAnalytics);
+  });
+}
 
 async function loadDashboardData() {
   if (!isAdmin()) {

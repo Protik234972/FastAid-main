@@ -29,6 +29,7 @@
         <nav class="nav-tabs" aria-label="Dashboard sections">
           <button class="nav-tab active" type="button" data-view="certifications">Certifications</button>
           <button class="nav-tab" type="button" data-view="monitoring">Monitoring</button>
+          <button class="nav-tab admin-only" type="button" data-view="analytics">Analytics</button>
           <button class="nav-tab admin-only" type="button" data-view="logs">System Logs</button>
           <button class="nav-tab admin-only" type="button" data-view="replay">Incident Replay</button>
           <button class="nav-tab admin-only" type="button" data-view="users">Sensitive Users</button>
@@ -126,6 +127,51 @@
               <h3>Live emergency requests</h3>
               <div class="alert-list" id="liveEmergencyList"></div>
             </section>
+          </div>
+        </section>
+
+        <section class="view admin-only" id="analyticsView" aria-label="System Analytics">
+          <div class="toolbar">
+            <div>
+              <h2>System Analytics</h2>
+              <p>Real-time insights on emergencies, volunteers, and response times.</p>
+            </div>
+            <button class="secondary-button" id="refreshAnalyticsBtn" type="button">Refresh Data</button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+            <div class="panel-block" style="padding: 20px;">
+              <h3>Incident Overview</h3>
+              <div style="display: flex; justify-content: space-around; margin: 20px 0; text-align: center;">
+                <div>
+                  <div style="font-size: 32px; font-weight: bold; color: var(--primary-color);" id="statTotalIncidents">0</div>
+                  <div style="color: var(--text-muted); font-size: 14px;">Total Incidents</div>
+                </div>
+                <div>
+                  <div style="font-size: 32px; font-weight: bold; color: #10b981;" id="statTotalVolunteers">0</div>
+                  <div style="color: var(--text-muted); font-size: 14px;">Active Volunteers</div>
+                </div>
+                <div>
+                  <div style="font-size: 32px; font-weight: bold; color: #f59e0b;" id="statAvgResponse">0s</div>
+                  <div style="color: var(--text-muted); font-size: 14px;">Avg Response Time</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-block" style="padding: 20px;">
+              <h3>Incidents by Status</h3>
+              <canvas id="incidentStatusChart" height="200"></canvas>
+            </div>
+
+            <div class="panel-block" style="padding: 20px;">
+              <h3>Recent Incident Volume (Last 7 Days)</h3>
+              <canvas id="incidentTimelineChart" height="200"></canvas>
+            </div>
+            
+            <div class="panel-block" style="padding: 20px;">
+              <h3>Volunteer Verification</h3>
+              <canvas id="volunteerStatusChart" height="200"></canvas>
+            </div>
           </div>
         </section>
 
