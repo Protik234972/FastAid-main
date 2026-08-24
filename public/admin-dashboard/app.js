@@ -308,7 +308,7 @@ async function fetchPastEmergencies() {
     const res = await fetch('/api/emergencies', { headers: getAuthHeaders() });
     if (res.ok) {
       const result = await res.json();
-      state.pastEmergencies = result.data.emergencies.filter(e => e.autoGps && e.autoGps.latitude);
+      state.pastEmergencies = result.data.emergencies.filter(e => e.location && e.location.coordinates && e.location.coordinates.length === 2);
       renderReplayList();
     }
   } catch (err) {
@@ -327,8 +327,8 @@ async function playIncident(id) {
     }
   });
 
-  const vLat = incident.autoGps.latitude;
-  const vLng = incident.autoGps.longitude;
+  const vLng = incident.location.coordinates[0];
+  const vLat = incident.location.coordinates[1];
 
   L.marker([vLat, vLng], {
     icon: L.divIcon({ html: '<div style="background: red; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white;"></div>', className: '' })

@@ -85,6 +85,7 @@ function showLoginModal(isLanding = false) {
             <option value="" disabled selected>Select Role</option>
             <option value="Victim">Victim</option>
             <option value="Volunteer">Volunteer</option>
+            <option value="Admin">Admin</option>
           </select>
           <button type="submit" class="btn-primary" style="width: 100%;">Create Account</button>
         </form>

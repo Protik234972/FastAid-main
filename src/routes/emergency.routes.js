@@ -192,3 +192,26 @@ router.get(
     }
   }
 );
+
+// Add GET endpoint for fetching a list of emergencies
+router.get(
+  '/',
+  requireAuthenticatedUser,
+  requireDatabase,
+  async (req, res, next) => {
+    try {
+      // In a real app, you might want to filter this by role (e.g. only return emergencies for the current user)
+      // Since this is used by the admin dashboard for replay, we'll return the latest emergencies.
+      const emergencies = await Emergency.find()
+        .populate('victimId', 'name')
+        .populate('assignedVolunteerId', 'name')
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .lean();
+      
+      return res.json({ data: { emergencies } });
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
