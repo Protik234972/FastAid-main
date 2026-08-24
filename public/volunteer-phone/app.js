@@ -155,26 +155,32 @@ function connectSocket() {
   });
 
   state.socket.on('emergency:live', (payload) => {
+    emergencyIdInput.value = payload.emergencyId || '';
+    
     if (payload.medicalProfile) {
-      emergencyIdInput.value = payload.emergencyId;
       victimMedicalPanel.style.display = 'block';
       displayBloodType.textContent = payload.medicalProfile.bloodType || 'Unknown';
       displayAllergies.textContent = payload.medicalProfile.allergies || 'None listed';
       displayConditions.textContent = payload.medicalProfile.preExistingConditions || 'None listed';
-      
-      if (typeof pollForResponderAiAnalysis === 'function') {
-        pollForResponderAiAnalysis(payload.emergencyId);
-      }
       
       if (payload.medicalProfile.emergencyContactName && payload.medicalProfile.emergencyContactPhone) {
         displayEmergencyContact.textContent = `${payload.medicalProfile.emergencyContactName} (${payload.medicalProfile.emergencyContactPhone})`;
       } else {
         displayEmergencyContact.textContent = 'Not provided';
       }
-      
-      if (payload.autoGps) {
-        initLeafletMap(payload.autoGps.latitude, payload.autoGps.longitude);
-      }
+    } else {
+      victimMedicalPanel.style.display = 'none';
+    }
+    
+    if (typeof pollForResponderAiAnalysis === 'function') {
+      pollForResponderAiAnalysis(payload.emergencyId);
+    }
+    
+    if (payload.autoGps) {
+      initLeafletMap(payload.autoGps.latitude, payload.autoGps.longitude);
+    }
+    
+    if (payload.emergencyId) {
       state.socket.emit('volunteer:join_emergency', { emergencyId: payload.emergencyId });
     }
   });
