@@ -342,19 +342,23 @@ function renderAnalytics() {
     return acc;
   }, {});
 
-  if (state.charts.statusChart) state.charts.statusChart.destroy();
-  state.charts.statusChart = new Chart(document.getElementById('incidentStatusChart'), {
-    type: 'doughnut',
-    data: {
-      labels: Object.keys(statusCounts),
-      datasets: [{
-        data: Object.values(statusCounts),
-        backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#6b7280'],
-        borderWidth: 0
-      }]
-    },
-    options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
-  });
+  if (state.charts.statusChart) {
+    state.charts.statusChart.data.datasets[0].data = Object.values(statusCounts);
+    state.charts.statusChart.update('none');
+  } else {
+    state.charts.statusChart = new Chart(document.getElementById('incidentStatusChart'), {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(statusCounts),
+        datasets: [{
+          data: Object.values(statusCounts),
+          backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#6b7280'],
+          borderWidth: 0
+        }]
+      },
+      options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } }, animation: false }
+    });
+  }
 
   // 2. Timeline Chart (Last 7 Days)
   const timelineData = {};
@@ -368,20 +372,24 @@ function renderAnalytics() {
     if (timelineData[dString] !== undefined) timelineData[dString]++;
   });
 
-  if (state.charts.timelineChart) state.charts.timelineChart.destroy();
-  state.charts.timelineChart = new Chart(document.getElementById('incidentTimelineChart'), {
-    type: 'bar',
-    data: {
-      labels: Object.keys(timelineData),
-      datasets: [{
-        label: 'Emergencies',
-        data: Object.values(timelineData),
-        backgroundColor: '#0ea5e9',
-        borderRadius: 4
-      }]
-    },
-    options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
-  });
+  if (state.charts.timelineChart) {
+    state.charts.timelineChart.data.datasets[0].data = Object.values(timelineData);
+    state.charts.timelineChart.update('none');
+  } else {
+    state.charts.timelineChart = new Chart(document.getElementById('incidentTimelineChart'), {
+      type: 'bar',
+      data: {
+        labels: Object.keys(timelineData),
+        datasets: [{
+          label: 'Emergencies',
+          data: Object.values(timelineData),
+          backgroundColor: '#0ea5e9',
+          borderRadius: 4
+        }]
+      },
+      options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }, animation: false }
+    });
+  }
 
   // 3. Volunteer Verification Chart
   const verifCounts = volunteers.reduce((acc, cur) => {
@@ -389,19 +397,23 @@ function renderAnalytics() {
     return acc;
   }, {});
 
-  if (state.charts.verifChart) state.charts.verifChart.destroy();
-  state.charts.verifChart = new Chart(document.getElementById('volunteerStatusChart'), {
-    type: 'pie',
-    data: {
-      labels: Object.keys(verifCounts),
-      datasets: [{
-        data: Object.values(verifCounts),
-        backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#6b7280'],
-        borderWidth: 0
-      }]
-    },
-    options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
-  });
+  if (state.charts.verifChart) {
+    state.charts.verifChart.data.datasets[0].data = Object.values(verifCounts);
+    state.charts.verifChart.update('none');
+  } else {
+    state.charts.verifChart = new Chart(document.getElementById('volunteerStatusChart'), {
+      type: 'pie',
+      data: {
+        labels: Object.keys(verifCounts),
+        datasets: [{
+          data: Object.values(verifCounts),
+          backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#6b7280'],
+          borderWidth: 0
+        }]
+      },
+      options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } }, animation: false }
+    });
+  }
 }
 
 function initReplayMap() {
