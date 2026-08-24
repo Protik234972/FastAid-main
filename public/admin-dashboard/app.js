@@ -288,7 +288,6 @@ function renderAll() {
   renderSensitiveUsers();
   renderLogs();
   renderReplayList();
-  renderAnalytics();
 }
 
 function renderReplayList() {
