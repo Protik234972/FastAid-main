@@ -237,7 +237,7 @@ function renderMonitoring() {
                   <strong>${emergency.victimName || 'Victim'} - ${emergency.type || 'Emergency'}</strong>
                   <span>${emergency.description || emergency.note || 'Emergency assistance needed.'}</span>
                 </div>
-                <span class="status-pill critical">Live</span>
+                <span class="status-pill critical">${emergency.status || 'Live'}</span>
               </article>
             `
           )
@@ -392,6 +392,16 @@ async function loadDashboardData() {
     const result = await response.json();
     state.certifications = result.data.certifications;
     state.users = result.data.users;
+    
+    if (result.data.emergencies) {
+      state.liveEmergencies = result.data.emergencies
+        .filter(e => !['Closed', 'Cancelled'].includes(e.status))
+        .map(e => ({
+          ...e,
+          victimName: e.victimId ? e.victimId.name : 'Victim'
+        }));
+    }
+
     state.logs.unshift(`[${new Date().toISOString()}] INFO admin.dashboardDataLoaded`);
     renderAll();
   } catch (error) {
@@ -511,6 +521,12 @@ document.querySelector('#refreshMetricsButton').addEventListener('click', () => 
     ...service,
     latencyMs: Math.max(80, service.latencyMs + Math.round(Math.random() * 80 - 28)),
   }));
+
+  loadDashboardData();
+  
+  if (state.socket && state.socket.connected) {
+    state.socket.emit('admin:join');
+  }
 
   renderAll();
 });
