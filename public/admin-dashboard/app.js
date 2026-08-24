@@ -169,10 +169,12 @@ function renderCertifications() {
           <td>${item.reliabilityScore}</td>
           <td><span class="status-pill ${item.verificationStatus.toLowerCase()}">${item.verificationStatus}</span></td>
           <td>
+            ${['Pending', 'Unverified'].includes(item.verificationStatus) ? `
             <div class="row-actions">
               <button class="action-button approve" type="button" data-action="approve" data-id="${item.id}">Approve</button>
               <button class="action-button reject" type="button" data-action="reject" data-id="${item.id}">Reject</button>
             </div>
+            ` : `<span style="color: var(--text-muted); font-size: 13px;">Reviewed</span>`}
           </td>
         </tr>
       `

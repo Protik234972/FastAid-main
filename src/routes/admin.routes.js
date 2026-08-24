@@ -39,8 +39,9 @@ router.patch('/certifications/:profileId/review', requireAdmin, requireDatabase,
       });
     }
 
-    profile.userId.verificationStatus = decision === 'approve' ? 'Verified' : 'Rejected';
-    await profile.userId.save();
+    const newStatus = decision === 'approve' ? 'Verified' : 'Rejected';
+    await User.findByIdAndUpdate(profile.userId._id, { verificationStatus: newStatus });
+    profile.userId.verificationStatus = newStatus;
 
     return res.json({
       data: {
