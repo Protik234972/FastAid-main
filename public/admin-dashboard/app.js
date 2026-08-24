@@ -342,6 +342,7 @@ function renderAnalytics() {
   }, {});
 
   if (state.charts.statusChart) {
+    state.charts.statusChart.data.labels = Object.keys(statusCounts);
     state.charts.statusChart.data.datasets[0].data = Object.values(statusCounts);
     state.charts.statusChart.update('none');
   } else {
@@ -372,6 +373,7 @@ function renderAnalytics() {
   });
 
   if (state.charts.timelineChart) {
+    state.charts.timelineChart.data.labels = Object.keys(timelineData);
     state.charts.timelineChart.data.datasets[0].data = Object.values(timelineData);
     state.charts.timelineChart.update('none');
   } else {
@@ -397,6 +399,7 @@ function renderAnalytics() {
   }, {});
 
   if (state.charts.verifChart) {
+    state.charts.verifChart.data.labels = Object.keys(verifCounts);
     state.charts.verifChart.data.datasets[0].data = Object.values(verifCounts);
     state.charts.verifChart.update('none');
   } else {
