@@ -327,7 +327,7 @@ function renderAnalytics() {
   
   if (responseCount > 0) {
     const avgSec = Math.round(totalResponseTimeMs / responseCount / 1000);
-    document.querySelector('#statAvgResponse').textContent = avgSec < 60 ? \`\${avgSec}s\` : \`\${Math.round(avgSec/60)}m\`;
+    document.querySelector('#statAvgResponse').textContent = avgSec < 60 ? `${avgSec}s` : `${Math.round(avgSec/60)}m`;
   } else {
     document.querySelector('#statAvgResponse').textContent = 'N/A';
   }
