@@ -52,6 +52,7 @@ let peerConnection = null;
 let dataChannel = null;
 let speechRecognition = null;
 let isRecording = false;
+let iceCandidateQueue = [];
 
 // Initialize Speech Recognition if supported
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -185,22 +186,35 @@ function initWebRTC() {
 
 function handleWebRTCAnswer(answer) {
   if (peerConnection) {
-    peerConnection.setRemoteDescription(new RTCSessionDescription(answer)).catch(console.error);
+    peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
+      .then(() => {
+        iceCandidateQueue.forEach(c => peerConnection.addIceCandidate(new RTCIceCandidate(c)).catch(console.error));
+        iceCandidateQueue = [];
+      })
+      .catch(console.error);
   }
 }
 
 function handleWebRTCCandidate(candidate) {
   if (peerConnection) {
-    peerConnection.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
+    if (!peerConnection.remoteDescription) {
+      iceCandidateQueue.push(candidate);
+    } else {
+      peerConnection.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
+    }
   }
 }
 
 sendChatBtn.addEventListener('click', () => {
   const text = chatInput.value.trim();
-  if (text && dataChannel && dataChannel.readyState === 'open') {
-    dataChannel.send(text);
-    appendChatMessage(text, true);
-    chatInput.value = '';
+  if (text) {
+    if (dataChannel && dataChannel.readyState === 'open') {
+      dataChannel.send(text);
+      appendChatMessage(text, true);
+      chatInput.value = '';
+    } else {
+      appendChatMessage('System: Connection not ready. Please wait...', true);
+    }
   }
 });
 
@@ -405,7 +419,7 @@ function applyResponderLocation(payload) {
     }
   }
 
-  if (!peerConnection) {
+  if (!peerConnection && state.emergencyId) {
     initWebRTC();
   }
 
@@ -474,11 +488,41 @@ async function sendEmergencyRequest() {
       pollForAiAnalysis(state.emergencyId);
     } else {
       payload.apiWarning = await response.json();
+      setStatus('Emergency failed', payload.apiWarning.error || 'Server error.');
+      emergencyButton.classList.remove('armed');
+      emergencyButton.querySelector('span').textContent = 'Hold for emergency';
+      emergencyButton.disabled = false;
+      state.requestSent = false;
+      return;
     }
   } catch (error) {
     payload.apiWarning = {
       error: error.message,
     };
+    setStatus('Emergency failed', error.message);
+    emergencyButton.classList.remove('armed');
+    emergencyButton.querySelector('span').textContent = 'Hold for emergency';
+    emergencyButton.disabled = false;
+    state.requestSent = false;
+    return;
+  }
+
+  // Show the map and progress panel now that the emergency is active
+  const progressPanel = document.getElementById('progressPanel');
+  if (progressPanel) {
+    progressPanel.hidden = false;
+    progressPanel.style.display = 'block';
+    
+    // Invalidate map size so Leaflet renders it properly after unhiding
+    if (state.map) {
+      setTimeout(() => {
+        state.map.invalidateSize();
+        state.map.fitBounds([state.victimLocation, state.responderLocation], {
+          padding: [42, 42],
+          maxZoom: 16,
+        });
+      }, 400);
+    }
   }
 
   if (state.socket) {

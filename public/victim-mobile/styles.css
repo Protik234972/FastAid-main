@@ -51,3 +51,21 @@
   font-size: 18px;
   text-align: center;
 }
+
+.chip {
+  flex: 1 1 calc(33% - 10px);
+  background: rgba(255,255,255,0.1);
+  border: 1px solid var(--border-color);
+  color: white;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.chip.active {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(0, 106, 78, 0.3);
+}

@@ -476,6 +476,7 @@ async function findRankedActiveResponders({
           type: 'Point',
           coordinates: [longitude, latitude],
         },
+        key: 'lastKnownLocation',
         distanceField: 'distanceMeters',
         maxDistance: maxDistanceMeters,
         spherical: true,

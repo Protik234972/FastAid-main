@@ -175,6 +175,7 @@ function connectSocket() {
       if (payload.autoGps) {
         initLeafletMap(payload.autoGps.latitude, payload.autoGps.longitude);
       }
+      state.socket.emit('volunteer:join_emergency', { emergencyId: payload.emergencyId });
     }
   });
 
@@ -195,6 +196,7 @@ function connectSocket() {
 
 let peerConnection = null;
 let dataChannel = null;
+let iceCandidateQueue = [];
 
 const rtcConfig = {
   iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
@@ -250,6 +252,8 @@ function handleWebRTCOffer(payload) {
     .then(() => peerConnection.createAnswer())
     .then(answer => peerConnection.setLocalDescription(answer))
     .then(() => {
+      iceCandidateQueue.forEach(c => peerConnection.addIceCandidate(new RTCIceCandidate(c)).catch(console.error));
+      iceCandidateQueue = [];
       if (state.socket) {
         state.socket.emit('webrtc:answer', {
           emergencyId: emergencyIdInput.value.trim(),
@@ -262,16 +266,24 @@ function handleWebRTCOffer(payload) {
 
 function handleWebRTCCandidate(candidate) {
   if (peerConnection) {
-    peerConnection.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
+    if (!peerConnection.remoteDescription) {
+      iceCandidateQueue.push(candidate);
+    } else {
+      peerConnection.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
+    }
   }
 }
 
 sendChatBtn.addEventListener('click', () => {
   const text = chatInput.value.trim();
-  if (text && dataChannel && dataChannel.readyState === 'open') {
-    dataChannel.send(text);
-    appendChatMessage(text, true);
-    chatInput.value = '';
+  if (text) {
+    if (dataChannel && dataChannel.readyState === 'open') {
+      dataChannel.send(text);
+      appendChatMessage(text, true);
+      chatInput.value = '';
+    } else {
+      appendChatMessage('System: Connection not ready. Please wait...', true);
+    }
   }
 });
 
@@ -308,8 +320,9 @@ async function startSharing() {
 
   state.watchId = navigator.geolocation.watchPosition(
     (position) => {
+      const latestVolunteer = getVolunteerPayload();
       const payload = {
-        ...volunteer,
+        ...latestVolunteer,
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
         accuracy: position.coords.accuracy,

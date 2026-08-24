@@ -120,16 +120,16 @@ for High-Density Urban Environments}
 % ══════════════════════════════════════════════════════════
 \section{Executive Summary}
 
-This is the Software Requirements Specification for FastAid. FastAid is an online, real-time emergency response platform that bridges the gap between emergency victims and trained first aid volunteer responders. The inspiration for FastAid originates from the frequent delays caused by heavy traffic and high dispatch latencies of traditional ambulance services in high-density urban environments. Often, critical life-saving interventions (such as CPR or hemorrhage control) fail to reach victims in time.
+This is the Software Requirements Specification of FastAid. FastAid is an online, real-time responders for disaster relief and rehabilitation.Emergency response platform that connects emergency victims with trained first responders to relief and rehabilitation in events. aid volunteer responders. The idea behind FastAid was inspired by the many delays that occur. assisted by the high dispatch delay and the high volume of traffic of the conventional emergency services.Supported by the high volume of traffic and dispatch delay of the conventional emergency services. urban environments. Many times, critical life-saving interventions (CPR, hemorrhage control, etc.) In the case of a failure of control (control), victims are not reached in time.
 
-FastAid aims to change that. By initiating an emergency request from a mobile device, a victim automatically broadcasts their GPS location. FastAid instantly matches this with verified volunteers within a 5km radius. The system also leverages an AI engine to analyze the emergency description and provide an immediate severity grading and responder advice. 
+FastAid is here to make that happen. The mobile device triggers an emergency request by calling a number, victim automatically broadcasts their GPS location. The verified data is matched with the FastAid instantly. volunteerswithina5kmradius. ThesystemalsoleveragesanAIenginetoanalyzetheemergency Describe and give an immediate severity grading and advice to the responder. 
 
-The big-picture objectives are straightforward:
+The overarching goals are simple:
 \begin{itemize}[leftmargin=2em]
-  \item Offer victims an ultra-fast method to dispatch nearby medical help with automatic GPS capture.
-  \item Track volunteer locations dynamically using WebSockets to ensure the closest responders are prioritized and visible to the victim.
-  \item Leverage AI analysis to evaluate the emergency description and mentally prepare volunteers while en route.
-  \item Maintain a secure administrative environment to verify medical credentials before volunteers go live.
+  \item Provide a super-fast way for victims to send immediate help to a medical facility, automatically using GPS to locate the nearest one. capture.
+  \item Use WebSockets to dynamically track volunteer locations to ensure that the closest volunteers are available. are emphasised and noticeable for the victim.
+  \item LeverageAIanalysistoevaluatetheemergencydescriptionandmentallypreparevolunteers while en route.
+  \item Ensure a secure administrative area and check medical credentials prior to volunteering teers go live.
 \end{itemize}
 
 % ══════════════════════════════════════════════════════════
@@ -137,35 +137,35 @@ The big-picture objectives are straightforward:
 % ══════════════════════════════════════════════════════════
 \section{Introduction}
 
-FastAid is targeted at urban populations where ambulance arrival times frequently exceed 10-15 minutes. The system addresses this gap by crowdsourcing verified medical intervention. Our foundational research indicates that immediate first aid significantly increases survival rates in life-threatening scenarios.
+FastAid is designed for addressing the needs of urban populations and where ambulance response time is often more than 10-15 minutes. minutes. The system aims to fill this gap by soliciting a crowdsourced intervention of the medical nature, which is verified. Our Research suggests that prompt first aid can improve survival rates in life-threatening scenarios.
 
 \subsection{Purpose}
-The purpose of this document is to explain how FastAid functions, how it is developed, and its system constraints. This encompasses functional requirements (what the system does), non-functional requirements (how well the system performs), and the architectural considerations. 
+Explain the operation of FastAid, its development and, its system constraints. This encompasses functional requirements (what the system does), non The functional requirements (system effectiveness), and architectural requirements. 
 
 \subsection{Documents Conventions}
-Features, headings, and key technical words are shown in bold.
+High-level terms, headings and features are highlighted in bold.
 \begin{itemize}[leftmargin=2em]
-  \item Survey data and explanation of technical terms are shown in italics.
-  \item Code is used to show the root path, database field names, and technical IDs (e.g. \texttt{/admin/users}, \texttt{lastKnownLocation}).
-  \item Quotation marks display the text of labels and buttons (e.g. ``Start GPS sharing,'' ``Accept Case'').
+  \item The terms used in the survey data and explanations are in italics.
+  \item Codeisusedtoshowtherootpath,databasefieldnames,andtechnicalIDs (e.g. \texttt{/admin/users}, \texttt{lastKnownLocation}).
+  \item This is done to indicate the text in the labels and buttons (such as Start GPS sharing,” “Accept”). Case”).
 \end{itemize}
 
-\subsection{Who should read this and how}
-The intended audience for this document is:
+\subsection{For whom is the book meant and how should it be read?}
+The target audience of this document is:
 \begin{enumerate}[leftmargin=2em]
-  \item Developers - as a robust reference during continuous development.
-  \item Project Managers - to understand feature priorities and implementation logic.
-  \item System Administrators - who oversee operations and need to understand the RBAC (Role-Based Access Control) mechanisms.
+  \item Developers – as a strong reference throughout development.
+  \item Project Managers- to know feature priorities and implementation logic.
+  \item System Administrators- who oversee operations and need to understand the RBAC (Role Based Access Control) mechanisms are the mechanisms that are based on the user\'s identity.
 \end{enumerate}
 
 \subsection{Problem Definition}
-Citizens in urban environments suffer severely from high ambulance dispatch latencies. Research highlights that every minute of delay in critical medical emergencies drastically lowers the survival rate. The situation is exacerbated by:
+In urban areas, citizens are heavily affected by delays in ambulance dispatch. Re According to search, every minute counts when it comes to medical emergencies and the number of seconds that pass significantly reduces chances of survival. the survival rate. The situation is exacerbated by:
 \begin{enumerate}[leftmargin=2em]
-  \item \textbf{Traffic Congestion}: Ambulances cannot bypass severe gridlock in peak urban hours.
-  \item \textbf{Lack of Immediate Care}: Bystanders often panic and lack the confidence or training to intervene.
-  \item \textbf{Information Asymmetry}: Even when help arrives, they often lack contextual knowledge of the victim's pre-existing conditions or the exact severity of the trauma.
+  \item \textbf{Traffic Congestion}: Ambulances are unable to go round the traffic snarl ups during the peak hours in the city.
+  \item \textbf{Lack of Immediate Care}: Bystanders have not the confidence or training to react to an emergency. intervene.
+  \item \textbf{Information Asymmetry}: Even with assistance, they may not have context knowledge. Independent of the victim\'s previous state of health or the actual extent of the trauma.
 \end{enumerate}
-FastAid addresses these issues by leveraging a hyper-local network of community volunteers on foot or light vehicles, empowered with AI analysis of the crisis.
+By utilizing the hyper-local network of volunteers in the community, FastAid is able to address these issues. On foot or light vehicles, with Artificial Intelligence analysis of the crisis.
 
 \subsection{Scope of Work}
 
@@ -173,8 +173,8 @@ FastAid addresses these issues by leveraging a hyper-local network of community 
 \begin{enumerate}[leftmargin=2em]
   \item User authentication and Role-Based Access Control (Victim, Volunteer, Admin).
   \item Emergency Requesting: Auto-GPS detection, description capture, and photo upload.
-  \item AI Integration: Automated evaluation of severity, key injuries, and medical advice via an LLM service.
-  \item Real-Time Tracking: Socket.IO driven volunteer location broadcasting.
+  \item AI Integration: Automated severity assessment, key injuries and medical advice provided through an a LLM service.
+  \item Real-Time Tracking: Socket.Radio broadcasting for the location of volunteers with streams from IO.
   \item Notification Engine: Web-Push notifications with SMS fallbacks for guaranteed delivery.
   \item Admin Dashboard: Credential verification, log viewing, and system metrics.
 \end{enumerate}
@@ -300,7 +300,7 @@ Papers analyzed across three themes:
 \section{Elicitation Results}
 
 \subsection{Survey Results}
-\textbf{Demographics:} 5 respondents including off-duty paramedics, nurses, and previous victims of traffic accidents. 
+\textbf{Demographics:} 5 respondents, off duty paramedics, nurses, and former victims of traffic accidents. 
 
 \begin{table}[h!]
 \centering
@@ -322,17 +322,17 @@ Flaky internet connections & 60\% & Relies on SMS fallbacks when 4G data drops. 
 \caption{Key survey findings}
 \end{table}
 
-\textbf{Key Insight --- ``Preparedness Gap'':} The data clearly shows that while volunteers are willing to help, they will not run blindly into an unknown situation. FastAid must act as an intelligent dispatcher, utilizing AI to summarize the panic-typed messages of a victim into actionable medical context for the responder.
+\textbf{Key Insight —“Preparedness Gap”:} clearly Thedata indicates there is an interest in being volunteers, but not prepared. To help, they will not plunge into an unfamiliar scenario. FastAid should be a smart person. Dispatcher, sum up a victim\'s panic-typed messages in actionable, using AI, Medical reason if this is for the responder.
 
 \subsection{Document Analysis Results}
-Research strongly supports the implementation of crowdsourced response. Studies show that systems utilizing strict 5km geolocation matching combined with atomic transaction assignments prevent "bystander effect" and "double-booking" of the same emergency.
+There is overwhelming research evidence to support the application of crowdsourced response. Studies show that A strict 5km geolocation matching with atomic transaction assign is used in systems. Mentions prevent from double booking of the same emergency and from the ”bystander effect”.
 
 % ══════════════════════════════════════════════════════════
 %  4. LATEST FEATURES FROM FIELDWORK
 % ══════════════════════════════════════════════════════════
 \section{Latest Features from Fieldwork}
 
-Based on the elicitation responses, the following critical features were baked into the FastAid platform:
+The following critical features were incorporated into the FastAid based on the elicitation responses: platform:
 
 \begin{longtable}{|c|p{4.5cm}|p{9.5cm}|}
 \caption{Features derived from fieldwork with detailed user needs} \\
@@ -347,15 +347,15 @@ Based on the elicitation responses, the following critical features were baked i
 \hline
 \endhead
 
-F1 & Auto-GPS Request Capture & Victims under extreme stress cannot type an address accurately. Pressing one button to fetch HTML5 Geolocation is mandatory. \\
+F1 & Auto-GPS Request Capture & Victimsunderextremestresscannottypeanaddressaccurately. Using one button to access HTML5 Geolocation is mandatory. \\
 \hline
-F2 & AI Emergency Analysis & Volunteers need to know if the victim is bleeding, unconscious, or burned. The LLM translates frantic descriptions into medical severity codes and advice. \\
+F2 & AI Emergency Analysis & The volunteers ought to know whether the victim is bleeding or not, unconscious, or burned. Translating frantic descrip with the LLM. A break down of medical severity codes and advice. \\
 \hline
-F3 & Web-Push with SMS Fallback & Urban dead-zones drop data packets. If a Web-Push fails after 2000ms, the system must trigger a reliable SMS fallback to ensure the volunteer is notified. \\
+F3 & Web-Push with SMS Fallback & When there are urban dead-zones, data packets drop. If a Web-Push fails The system should send a dependable SMS after 2000ms. A fall back mechanism should be in place to ensure that the volunteer is notified. \\
 \hline
-F4 & Live Socket.IO Tracking & Victims experience extreme anxiety waiting for help. Watching the volunteer's GPS dot move on the Leaflet map in real-time provides immense psychological relief. \\
+F4 & Live Socket.IO Tracking & Victims are very anxious about being rescued. Watchingthevolunteer’sGPSdotmoveontheLeaflet mapinreal-timeprovidesimmensepsychologicalrelief. \\
 \hline
-F5 & Medical Profiles & Responders need to know if the victim has pre-existing conditions (e.g., Asthma, Hemophilia) or specific blood types before administering care. \\
+F5 & Medical Profiles & Respondersneedtoknowif thevictimhaspre-existing conditions(e.g.,Asthma,Hemophilia)orspecificblood typesbeforeadministeringcare. \\
 \hline
 \end{longtable}
 
@@ -395,7 +395,7 @@ Static API Tracking & \checkmark & WebSockets & Users requested smooth, real-tim
 % ── Use Case Diagram ─────────────────────────────────────
 \subsection{Use Case Diagram}
 
-Figure~\ref{fig:usecase} gives an overview of the interactions between the three primary roles and the system.
+An overview of the interactions between the three primary roles and the system is given in Figure~\ref{fig:usecase}.
 
 \begin{figure}[H]
 \centering
@@ -445,7 +445,7 @@ Figure~\ref{fig:usecase} gives an overview of the interactions between the three
 % ── Sequence Diagram ─────────────────────────────────────
 \subsection{Sequence Diagram --- Emergency Dispatch Flow}
 
-Figure~\ref{fig:sequence} maps out the process of an emergency request being analyzed, dispatched, and accepted by a volunteer.
+Figure~\ref{fig:sequence} depicts the process of an emergency request being analyzed, dispatched, and accepted by a volunteer.
 
 \begin{figure}[H]
 \centering
@@ -495,7 +495,7 @@ Figure~\ref{fig:sequence} maps out the process of an emergency request being ana
 % ── Activity Diagram ─────────────────────────────────────
 \subsection{Activity Diagram --- Emergency Dispatch Lifecycle}
 
-Figure~\ref{fig:activity} illustrates the complete lifecycle of an emergency from creation through to closure, including the AI analysis branch and the notification fallback mechanism.
+Figure~\ref{fig:activity} illustrates the complete lifecycle of an emergency from creation to closure, including the AI analysis branch and the notification fallback mechanism.
 
 \begin{figure}[H]
 \centering
@@ -578,8 +578,8 @@ Figure~\ref{fig:activity} illustrates the complete lifecycle of an emergency fro
 
 \subsubsection*{User Stories}
 \begin{enumerate}[leftmargin=2em]
-  \item A victim wants to register via mobile/email securely and store their medical profile (allergies, blood type) so responders are informed during a crisis.
-  \item A volunteer wants to upload their medical certifications and toggle their availability status when they are off-duty.
+  \item A victim wishes to register by means of mobile/email and have their medical profile (allergies, blood type) safely kept so that the responders will be informed in case of a crisis.
+  \item A volunteer wishes to upload their medical qualifications and switch on or off their availability status when they are off duty.
 \end{enumerate}
 
 \subsubsection*{Functional Requirements}
@@ -588,11 +588,11 @@ Figure~\ref{fig:activity} illustrates the complete lifecycle of an emergency fro
 \frbox{FR-02: Medical Profile Management}
 {Victims}
 {User accesses profile settings.}
-{The user can populate the \texttt{medicalProfile} embedded document: \texttt{bloodType}, \texttt{allergies}, \texttt{preExistingConditions}, \texttt{emergencyContactName}, and \texttt{emergencyContactPhone}.}
+{The user can put in the \texttt{medicalProfile} embedded document: \texttt{bloodType}, \texttt{allergies}, \texttt{preExistingConditions}, \texttt{emergencyContactName}, and \texttt{emergencyContactPhone}.}
 {%
 \begin{itemize}[leftmargin=1.5em]
-  \item Updates immediately reflect in any future emergency dispatches.
-  \item The emergency contact fields allow responders to notify a family member.
+  \item Updates are immediately reflected in all subsequent emergency responses.
+  \item The emergency contact fields allow responders to contact a family member.
 \end{itemize}
 }
 
@@ -622,8 +622,8 @@ Figure~\ref{fig:activity} illustrates the complete lifecycle of an emergency fro
 
 \subsubsection*{User Stories}
 \begin{enumerate}[leftmargin=2em]
-  \item A victim wants to press a single button and have their GPS automatically captured so they don't waste time typing addresses during a crisis.
-  \item The victim wants the system to understand the nature of the crisis and relay severity information to approaching volunteers.
+  \item A victim wishes to press a single button and have their GPS automatically taken so that they do not squander their time in typing addresses in a crisis.
+  \item The victim wants the system to understand the nature of the crisis and provide severity information to volunteers approaching the scene.
   \item The victim wants to cancel an accidental alarm quickly so that volunteers are not dispatched unnecessarily.
 \end{enumerate}
 
@@ -669,8 +669,8 @@ Figure~\ref{fig:activity} illustrates the complete lifecycle of an emergency fro
 
 \subsubsection*{User Stories}
 \begin{enumerate}[leftmargin=2em]
-  \item A victim wants to see the volunteer's location moving on a live map so they know help is actively approaching.
-  \item A volunteer wants the system to automatically match them to the nearest emergency so that travel time is minimized.
+  \item A victim wants to observe the volunteer\'s position tracking on a live map to ensure that they are getting help.
+  \item A volunteer would like the system to match them to the nearest emergency immediately so that they travel less.
 \end{enumerate}
 
 \subsubsection*{Functional Requirements}
@@ -704,9 +704,9 @@ Figure~\ref{fig:activity} illustrates the complete lifecycle of an emergency fro
 
 \subsubsection*{User Stories}
 \begin{enumerate}[leftmargin=2em]
-  \item An admin wants a snapshot of overall system status including uptime, active users, and pending certifications.
-  \item An admin needs to verify volunteer medical credentials before they can be dispatched.
-  \item An admin wants to review audit logs of all emergency status transitions.
+  \item An administrator wants a summary of system status in general, containing uptime, active users, and pending certificates.
+  \item An admin must confirm volunteer medical credentials before dispatching.
+  \item An administrator wishes to view audit logs of every emergency state transition.
 \end{enumerate}
 
 \subsubsection*{Functional Requirements}
@@ -1234,11 +1234,11 @@ WSGI & Web Server Gateway Interface. \\
 % ══════════════════════════════════════════════════════════
 \section{Conclusion}
 
-The FastAid Software Requirements Specification solidifies the operational blueprints for a rapid, crowdsourced medical dispatch system. By strictly detailing 16 functional requirements across 6 components --- from Auto-GPS capture and AI severity analysis to atomic transactional case acceptance and live WebSocket tracking --- this SRS guarantees that FastAid can scale to meet the demands of urban emergencies securely and reliably.
+FastAid Software Requirements Specification solidifies the operational blue prints of a fast, crowdsourced medical dispatch system. Describing in detail the 16 func tional requirements for 6 components---from Auto-GPS capture and AI severity analysis to atomic transactional case acceptance and live WebSocket tracking---this SRS ensures that FastAid can safely and securely meet the demands of urban emergencies.
 
-Key differentiators from the original SRS include the removal of the Rating/Feedback systems (which added friction without clear value), and the addition of AI Emergency Analysis, real-time Socket.IO GPS streaming, and a rigorous 5-state volunteer verification lifecycle. These changes are grounded in both survey evidence (the ``Preparedness Gap'') and academic literature on crowdsourced emergency response \cite{zijlko2021, hasselqvist2015}.
+The key differentiators from the original SRS are the deletion of the Rat ing/Feedback systems (which created friction with no value) and the inclusion of AI Emergency Analysis, real-time Socket.IO GPS streaming and a rigorous 5-state volunteer verification process. These changes are based on the survey data (the “Preparedness Gap”) as well as the literature on crowdsourced emer gency response \cite{zijlko2021, hasselqvist2015}.
 
-The document identifies one critical partially-implemented requirement --- the mock authentication system (\texttt{x-demo-role}) --- which must be replaced with production-grade JWT or session-based authentication before deployment. All other requirements are fully implemented and traceable to the current codebase.
+This document specifies one critical requirement that is partially imple mented—the mock authentication system (\texttt{x-demo-role})—which is supposed to be re placed with a JWT or session-based authentication before deployment. All other prerequisites have been fulfilled and can be traced back to the current base code.
 
 % ══════════════════════════════════════════════════════════
 %  15. REFERENCES
